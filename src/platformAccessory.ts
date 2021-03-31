@@ -10,6 +10,8 @@ import type {
 import { LIRC } from './platform';
 import { LIRCController } from './lirc';
 
+import ping from 'net-ping';
+
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
@@ -41,6 +43,16 @@ export class LIRCTelevision {
       accessory.context.device.delay || 0,
       platform.log
     );
+
+    accessory.context.device.ip || '0.0.0.0';
+    // initialise ping interval
+    if (accessory.context.device.ip !== '0.0.0.0') {
+      this.platform.log.debug('Enabling polling!');
+      setInterval(
+        this.pingDevice.bind(this),
+        accessory.context.device.pollingInterval || 20000
+      );
+    }
 
     // set accessory information
     this.accessory
@@ -87,7 +99,11 @@ export class LIRCTelevision {
     // register handlers for the ActiveIdentifier Characteristic (input events)
     this.tvService
       .getCharacteristic(this.platform.Characteristic.ActiveIdentifier)
-      .on(CharacteristicEventTypes.SET, this.setActiveIdentifier.bind(this)); // SET - bind to the 'setBrightness` method below
+      .on(CharacteristicEventTypes.SET, this.setActiveIdentifier.bind(this)); // SET - bind to the 'setActiveIdentifier` method below
+
+    this.tvService
+      .getCharacteristic(this.platform.Characteristic.PowerModeSelection)
+      .on(CharacteristicEventTypes.SET, this.setPowerModeSelection.bind(this)); // SET - bind to the 'setPowerModeSelection` method below
 
     // register handlers for the remote control
     if (accessory.context.device.remoteKeys) {
@@ -157,10 +173,15 @@ export class LIRCTelevision {
           input: {
             id: string;
             name: string;
+            visible: boolean;
             type: number; // See InputSourceType from hap-nodejs
           },
           i: number
         ) => {
+          // eslint-disable-next-line eqeqeq
+          if (input.visible == null) {
+            input.visible = true;
+          }
           const inputService = accessory.addService(
             this.platform.Service.InputSource,
             input.name,
@@ -177,12 +198,68 @@ export class LIRCTelevision {
               this.platform.Characteristic.IsConfigured.CONFIGURED
             )
             .setCharacteristic(
+              this.platform.Characteristic.TargetVisibilityState,
+              input.visible
+                ? this.platform.Characteristic.CurrentVisibilityState.SHOWN
+                : this.platform.Characteristic.CurrentVisibilityState.HIDDEN
+            )
+            .setCharacteristic(
+              this.platform.Characteristic.CurrentVisibilityState,
+              input.visible
+                ? this.platform.Characteristic.CurrentVisibilityState.SHOWN
+                : this.platform.Characteristic.CurrentVisibilityState.HIDDEN
+            )
+            .setCharacteristic(
               this.platform.Characteristic.InputSourceType,
               input.type
             );
           this.tvService.addLinkedService(inputService);
         }
       );
+  }
+
+  /**
+   * Updating characteristics values asynchronously.
+   *
+   * Example showing how to update the state of a Characteristic asynchronously instead
+   * of using the `on('get')` handlers.
+   * Here we change update the motion sensor trigger states on and off every 10 seconds
+   * the `updateCharacteristic` method.
+   *
+   */
+  pingDevice(): void {
+    const target = this.accessory.context.device.ip;
+    let isAlive: boolean = this.states.Active;
+    // Default options
+    const options = {
+      networkProtocol: ping.NetworkProtocol.IPv4,
+      packetSize: 16,
+      retries: 0,
+      sessionId: process.pid % 65535,
+      timeout: 2000,
+      ttl: 128
+    };
+    const session = ping.createSession(options);
+
+    session.pingHost(target, (error: any, target: any) => {
+      if (error) {
+        this.platform.log.debug(target + ': ' + error.toString());
+        isAlive = false;
+      } else {
+        this.platform.log.debug(target + ': Alive');
+        isAlive = true;
+      }
+
+      if (isAlive !== this.states.Active) {
+        this.states.Active = isAlive;
+        // push the new value to HomeKit
+        this.tvService.updateCharacteristic(
+          this.platform.Characteristic.Active,
+          this.states.Active
+        );
+        this.platform.log.debug('Triggering tvService:', this.states.Active);
+      }
+    });
   }
 
   /**
@@ -194,6 +271,7 @@ export class LIRCTelevision {
     callback: CharacteristicSetCallback
   ): void {
     if ((this.states.Active && !value) || (!this.states.Active && value)) {
+      //TODO: Suspend the ping timer: https://stackoverflow.com/questions/24724852/pause-and-resume-setinterval
       this.controller
         .sendCommands(
           value
@@ -213,6 +291,7 @@ export class LIRCTelevision {
           this.platform.log.error(error);
           callback(error);
         });
+      //TODO: Restart the interval timer
     } else {
       this.platform.log.error(
         `Skipped power ${value ? 'on' : 'off'} command since no state change.`
@@ -272,6 +351,19 @@ export class LIRCTelevision {
         this.platform.log.error(error);
         callback(error);
       });
+  }
+
+  /**
+   * Handle "SET" requests from HomeKit
+   * These are sent when the user changes the state of an accessory. (View TV Settings Button)
+   */
+  setPowerModeSelection(
+    value: CharacteristicValue,
+    callback: CharacteristicSetCallback
+  ): void {
+    this.platform.log.debug('Requested tv settings (PowerModeSelection)');
+    //TODO: Implement TV Settings
+    callback(null);
   }
 
   /**

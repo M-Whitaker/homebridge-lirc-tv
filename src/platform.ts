@@ -77,6 +77,7 @@ export class LIRC implements DynamicPlatformPlugin {
         const accessory = new this.api.platformAccessory(device.name, uuid);
 
         // set the accessory category
+        //TODO: Add a cfg for this
         accessory.category = this.api.hap.Categories.TELEVISION;
 
         // store a copy of the device object in the `accessory.context`

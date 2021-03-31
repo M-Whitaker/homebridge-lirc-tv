@@ -15,6 +15,21 @@
               "type": "string",
               "required": true
             },
+            "type": {
+              "title": "Device Type",
+              "type": {
+                "title": "Type",
+                "type": "integer",
+                "required": true,
+                "oneOf": [
+                  { "title": "Television", "enum": [31] },
+                  { "title": "Audio Receiver", "enum": [34] },
+                  { "title": "Set Top Box", "enum": [35] },
+                  { "title": "Streaming Stick", "enum": [36] }
+                ]
+              },
+              "placeholder": "Television"
+            },
             "manufacturer": {
               "type": "string",
               "placeholder": "Unknown"
@@ -22,6 +37,18 @@
             "serial": {
               "type": "string",
               "placeholder": "Unknown"
+            },
+            "ip": {
+              "type": "string",
+              "placeholder": "0.0.0.0"
+            },
+            "mac": {
+              "type": "string",
+              "placeholder": "ab:cd:ef:fe:dc:ba"
+            },
+            "pollingInterval": {
+              "type": "number",
+              "placeholder": -1
             },
             "model": {
               "type": "string",
@@ -106,6 +133,11 @@
                     "title": "Name",
                     "type": "string",
                     "required": true
+                  },
+                  "visible": {
+                    "title": "Visible",
+                    "type": "boolean",
+                    "placeholder": true
                   },
                   "type": {
                     "title": "Type",
