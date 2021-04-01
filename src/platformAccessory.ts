@@ -21,6 +21,7 @@ export class LIRCTelevision {
   private tvService: Service;
   private tvSpeakerService: Service | undefined;
   private controller: LIRCController;
+  private pollingInterval: NodeJS.Timeout | undefined;
 
   /**
    * These are just used to create a working example
@@ -43,12 +44,13 @@ export class LIRCTelevision {
       accessory.context.device.delay || 0,
       platform.log
     );
-
-    accessory.context.device.ip || '0.0.0.0';
+    if (accessory.context.device.ip == null) {
+      accessory.context.device.ip = '0.0.0.0';
+    }
     // initialise ping interval
     if (accessory.context.device.ip !== '0.0.0.0') {
       this.platform.log.debug('Enabling polling!');
-      setInterval(
+      this.pollingInterval = setInterval(
         this.pingDevice.bind(this),
         accessory.context.device.pollingInterval || 20000
       );
@@ -167,7 +169,15 @@ export class LIRCTelevision {
     }
 
     // register inputs
-    accessory.context.device.inputs &&
+    if (accessory.context.device.inputs) {
+      if (accessory.context.device.statelessInputs) {
+        accessory.context.device.inputs.unshift({
+          id: ' ',
+          name: ' ',
+          visible: true,
+          type: 2
+        });
+      }
       accessory.context.device.inputs.forEach(
         (
           input: {
@@ -216,6 +226,7 @@ export class LIRCTelevision {
           this.tvService.addLinkedService(inputService);
         }
       );
+    }
   }
 
   /**
@@ -271,7 +282,10 @@ export class LIRCTelevision {
     callback: CharacteristicSetCallback
   ): void {
     if ((this.states.Active && !value) || (!this.states.Active && value)) {
-      //TODO: Suspend the ping timer: https://stackoverflow.com/questions/24724852/pause-and-resume-setinterval
+      // Suspend the ping timer
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
       this.controller
         .sendCommands(
           value
@@ -291,7 +305,13 @@ export class LIRCTelevision {
           this.platform.log.error(error);
           callback(error);
         });
-      //TODO: Restart the interval timer
+      // Restart the ping timer
+      if (this.pollingInterval) {
+        this.pollingInterval = setInterval(
+          this.pingDevice.bind(this),
+          this.accessory.context.device.pollingInterval || 20000
+        );
+      }
     } else {
       this.platform.log.error(
         `Skipped power ${value ? 'on' : 'off'} command since no state change.`
@@ -337,12 +357,26 @@ export class LIRCTelevision {
     this.controller
       .sendCommands(thisInput.command)
       .then(() => {
-        // Store the selected input in state
-        this.states.ActiveIdentifier = value as number;
-        this.platform.log.debug(
-          'Set Characteristic Active Identifier -> ',
-          value
-        );
+        if (this.accessory.context.device.statelessInputs) {
+          this.states.ActiveIdentifier = 0;
+          setTimeout(() => {
+            this.tvService.updateCharacteristic(
+              this.platform.Characteristic.ActiveIdentifier,
+              0
+            );
+          }, 1000);
+          this.platform.log.debug(
+            'Reset Characteristic Active Identifier -> ',
+            0
+          );
+        } else {
+          // Store the selected input in state
+          this.states.ActiveIdentifier = value as number;
+          this.platform.log.debug(
+            'Set Characteristic Active Identifier -> ',
+            value
+          );
+        }
 
         // you must call the callback function
         callback(null);

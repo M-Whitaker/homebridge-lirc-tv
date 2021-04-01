@@ -124,6 +124,11 @@
                 "type": "string"
               }
             },
+            "statelessInputs" : {
+              "title": "Stateless Inputs",
+              "type": "boolean",
+              "placeholder": false
+            },
             "inputs": {
               "type": "array",
               "items": {
