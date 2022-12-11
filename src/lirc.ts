@@ -1,4 +1,4 @@
-import net from 'net';
+var exec = require('child_process').exec;
 import { Logger } from 'homebridge';
 
 const DELAY_INDENTIFIER = 'DELAY|';
@@ -39,24 +39,17 @@ export class LIRCController {
         this.log.info(`Delaying for ${delayTimeout}ms`);
         setTimeout(resolve, delayTimeout);
       } else {
-        const client = net.connect(
-          {
-            host: this.host,
-            port: this.port
-          },
-          () => {
-            const requestBody = `SEND_ONCE ${this.remote} ${key}`;
-            this.log.info(
-              `Sending command to LIRC (${this.host}:${this.port}): ${requestBody}`
-            );
-            client.write(`${requestBody}\r\n`);
-            client.end();
-            setTimeout(resolve, this.delay);
-          }
+        const requestBody = `SEND_ONCE ${this.remote} ${key}`;
+        this.log.info(
+          `Sending command to LIRC (${this.host}:${this.port}): ${requestBody}`
         );
-
-        client.on('error', (error) => {
-          reject(error);
+        exec(`irsend ${requestBody}`, (error: Error, stdout: any, stderr: any) => {
+          if (error) {
+            this.log.error(`Sending command failed...`);
+            reject(error);
+          }
+          setTimeout(resolve, this.delay);
+          this.log.info("Command Sent...");
         });
       }
     };
