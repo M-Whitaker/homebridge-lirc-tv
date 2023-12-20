@@ -122,7 +122,7 @@ export class LIRCTelevision {
         .on(
           CharacteristicEventTypes.SET,
           (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
-            if (value in mappedRemoteKeys) {
+            if ((value as number) in mappedRemoteKeys) {
               this.controller
                 .sendCommands(mappedRemoteKeys[value as number])
                 .then(() => {
