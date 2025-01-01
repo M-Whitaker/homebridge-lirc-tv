@@ -1,6 +1,7 @@
 {
   "displayName": "Homebridge LIRC TV",
   "name": "homebridge-lirc-tv",
+  "type": "module",
   "version": "2.0.0-beta",
   "description": "Control IR Televisions using LIRC",
   "license": "Apache-2.0",
