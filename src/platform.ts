@@ -1,10 +1,12 @@
 import { APIEvent } from 'homebridge';
 import type {
   API,
+  Characteristic,
   DynamicPlatformPlugin,
   Logger,
   PlatformAccessory,
-  PlatformConfig
+  PlatformConfig,
+  Service
 } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
@@ -16,8 +18,8 @@ import { LIRCTelevision } from './platformAccessory';
  * parse the user config and discover/register accessories with Homebridge.
  */
 export class LIRC implements DynamicPlatformPlugin {
-  public readonly Service = this.api.hap.Service;
-  public readonly Characteristic = this.api.hap.Characteristic;
+  public readonly Service: typeof Service;
+  public readonly Characteristic: typeof Characteristic;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -27,6 +29,8 @@ export class LIRC implements DynamicPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API
   ) {
+    this.Service = api.hap.Service;
+    this.Characteristic = api.hap.Characteristic;
     this.log.debug('Finished initializing platform:', PLATFORM_NAME);
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.

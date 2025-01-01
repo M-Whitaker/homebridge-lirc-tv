@@ -1,4 +1,4 @@
-const exec = require('child_process').exec;
+import { exec } from 'child_process';
 import { Logger } from 'homebridge';
 
 const DELAY_INDENTIFIER = 'DELAY|';
@@ -45,7 +45,7 @@ export class LIRCController {
         );
         exec(
           `irsend ${requestBody}`,
-          (error: Error, stdout: any, stderr: any) => {
+          (error: Error | null, stdout: string, stderr: string) => {
             if (error) {
               this.log.error('Sending command failed...');
               reject(error);
