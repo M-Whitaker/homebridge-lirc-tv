@@ -48,6 +48,6 @@
     "homebridge-lib": "^7.1.0"
   },
   "overrides": {
-    "nan": "2.18.0"
+    "nan": "^2.22.0"
   }
 }
