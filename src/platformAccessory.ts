@@ -7,8 +7,8 @@ import type {
   CharacteristicGetCallback
 } from 'homebridge';
 
-import { LIRC } from './platform';
-import { LIRCController } from './lirc';
+import { LIRC } from './platform.js';
+import { LIRCController } from './lirc.js';
 
 import ping from 'net-ping';
 

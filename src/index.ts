@@ -1,7 +1,7 @@
 import type { API } from 'homebridge';
 
-import { PLATFORM_NAME } from './settings';
-import { LIRC } from './platform';
+import { PLATFORM_NAME } from './settings.js';
+import { LIRC } from './platform.js';
 
 /**
  * This method registers the platform with Homebridge

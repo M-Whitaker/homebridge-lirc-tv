@@ -9,8 +9,8 @@ import type {
   Service
 } from 'homebridge';
 
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { LIRCTelevision } from './platformAccessory';
+import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
+import { LIRCTelevision } from './platformAccessory.js';
 
 /**
  * HomebridgePlatform
