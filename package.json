@@ -1,26 +1,27 @@
 {
   "displayName": "Homebridge LIRC TV",
   "name": "homebridge-lirc-tv",
-  "version": "1.1.2",
+  "type": "module",
+  "version": "2.0.0-beta",
   "description": "Control IR Televisions using LIRC",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/pkmnct/homebridge-lirc-tv.git"
+    "url": "git://github.com/M-Whitaker/homebridge-lirc-tv.git"
   },
   "bugs": {
-    "url": "https://github.com/pkmnct/homebridge-lirc-tv/issues"
+    "url": "https://github.com/M-Whitaker/homebridge-lirc-tv/issues"
   },
   "engines": {
-    "node": ">=20.10.0",
-    "homebridge": ">=1.7.0"
+    "node": "^18.20.4 || ^20.15.1",
+    "homebridge": "^1.6.0 || ^2.0.0-beta.0"
   },
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/**.ts --fix",
-    "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
-    "prepublishOnly": "npm run lint && npm run build"
+    "lint": "eslint . --max-warnings=0",
+    "prepublishOnly": "npm run lint && npm run build",
+    "watch": "npm run build && npm link && nodemon"
   },
   "keywords": [
     "homebridge-plugin",
@@ -30,23 +31,23 @@
     "television",
     "homekit"
   ],
-  "dependencies": {},
   "devDependencies": {
-    "@types/node": "^20.10.5",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.0",
-    "homebridge": "^1.7.0",
-    "nodemon": "^3.0.2",
-    "prettier": "^3.1.1",
-    "rimraf": "^5.0.5",
+    "@eslint/js": "^9.14.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^22.8.6",
+    "eslint": "^9.14.0",
+    "homebridge": "^2.0.0-beta.0",
+    "nodemon": "^3.1.7",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.12.2",
     "net-ping": "^1.2.3"
   },
+  "dependencies": {
+    "homebridge-lib": "^7.1.0"
+  },
   "overrides": {
-    "nan": "2.18.0"
+    "nan": "^2.22.0"
   }
 }

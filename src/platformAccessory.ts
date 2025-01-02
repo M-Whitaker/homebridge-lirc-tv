@@ -7,8 +7,8 @@ import type {
   CharacteristicGetCallback
 } from 'homebridge';
 
-import { LIRC } from './platform';
-import { LIRCController } from './lirc';
+import { LIRC } from './platform.js';
+import { LIRCController } from './lirc.js';
 
 import ping from 'net-ping';
 
@@ -171,12 +171,12 @@ export class LIRCTelevision {
     // register inputs
     if (accessory.context.device.inputs) {
       if (accessory.context.device.statelessInputs) {
-        accessory.context.device.inputs.unshift({
-          id: ' ',
-          name: ' ',
-          visible: true,
-          type: 2
-        });
+        // accessory.context.device.inputs.unshift({
+        //   id: ' ',
+        //   name: ' ',
+        //   visible: true,
+        //   type: 2
+        // });
       }
       accessory.context.device.inputs.forEach(
         (
