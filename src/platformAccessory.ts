@@ -171,12 +171,12 @@ export class LIRCTelevision {
     // register inputs
     if (accessory.context.device.inputs) {
       if (accessory.context.device.statelessInputs) {
-        accessory.context.device.inputs.unshift({
-          id: ' ',
-          name: ' ',
-          visible: true,
-          type: 2
-        });
+        // accessory.context.device.inputs.unshift({
+        //   id: ' ',
+        //   name: ' ',
+        //   visible: true,
+        //   type: 2
+        // });
       }
       accessory.context.device.inputs.forEach(
         (
